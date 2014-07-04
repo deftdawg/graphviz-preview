@@ -11,9 +11,6 @@
   "engines": {
     "atom": ">0.50.0"
   },
-  "dependencies": {
-    "language-dot": ">=1.5.0"
-  },
   "bugs": {
     "url": "https://github.com/jumpkick/graphviz-preview/issues"
   },
