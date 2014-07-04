@@ -1,0 +1,16 @@
+# See https://atom.io/docs/latest/creating-a-package#menus for more details
+'context-menu':
+  '.overlayer':
+      'Preview DOT': 'graphviz-preview:toggle'
+
+'menu': [
+  {
+    'label': 'Packages'
+    'submenu': [
+      'label': 'Preview DOT'
+      'submenu': [
+        { 'label': 'Enable Preview', 'command': 'graphviz-preview:toggle' }
+      ]
+    ]
+  }
+]
