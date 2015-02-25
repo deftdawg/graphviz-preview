@@ -118,6 +118,8 @@ class GraphvizPreviewView extends ScrollView
               }
               try {
                 document.getElementById('rendered-graph').innerHTML = Viz(dot, 'svg');
+                var renderedSVG = document.getElementById('rendered-graph').getElementsByTagName('svg')[0];
+                renderedSVG.onclick = shrinkSVGToFit;
               } catch (err) {
                 document.getElementById('rendered-graph').innerHTML = "<div class='dot-syntax-error'>Dot syntax error</div>"
                   + lastConsoleMessage
@@ -147,12 +149,77 @@ class GraphvizPreviewView extends ScrollView
                + "<p>Here is a slightly more complicated version of the same graph with some addtional rendering parameters:</p>"
                + "<div><textarea cols='30' rows='14'>"+sampleGraph2+"</textarea>"
                + Viz(sampleGraph2, 'svg')
-               + "</div>";
+               + "</div>"
+               + "<p>Once you begin editing, clicking on a graph will shrink it to fit or zoom back to full size if previously shrunken.";
+            }
+          }
+
+          function debug_line(message) {
+            document.getElementById('debug-line').value = message + "\\n" + document.getElementById('debug-line').value ;
+          }
+
+          shrinkToFit = false;
+          function shrinkSVGToFit() {
+            var renderedSVG = document.getElementById('rendered-graph').getElementsByTagName('svg')[0];
+            switch (shrinkToFit) {
+              case true:
+                shrinkToFit = false;
+                renderedSVG.style.webkitTransform = "scale(1.0)";
+                break;
+
+              default:
+                shrinkToFit = true;
+
+                // Get width/height of document view and rendered SVG image
+                vch = document.documentElement.clientHeight;
+                vcw = document.documentElement.clientWidth;
+                sch = renderedSVG.clientHeight;
+                scw = renderedSVG.clientWidth;
+
+                debug_line("vch: " + vch +" vcw: " + vcw + " sch: " + sch + " scw: " + scw);
+
+                // Find which SVG dimension exceeds the bounds of the document view, use that to set new scale
+                if (sch > vch) {
+                  nsch = Math.trunc(100 * vch / sch);
+                } else {
+                  nsch = null;
+                }
+                if (scw > vcw) {
+                  nscw = Math.trunc(100 * vcw / scw);
+                } else {
+                  nscw = null;
+                }
+                debug_line("nsch: " + nsch + " nscw: " + nscw);
+
+                // Set the new scale (ns) value to null
+                ns = null;
+                // If we have a new height or a new width we determine which is the smallest to fit the whole picture.
+                if (nsch != null || nscw != null) {
+                    ns = (nsch != null && (nscw == null || nsch < nscw) ? nsch : nscw);
+                    scw = renderedSVG.clientWidth;
+                    sch = renderedSVG.clientHeight;
+                    nscw = (ns*scw)/100;
+                    nsch = (ns*sch)/100;
+                    // FIXME: The offset values are a bit off, please send patches/pulls if you have better ones
+                    // https://github.com/jumpkick/graphviz-preview/issues/3
+                    Yoffset = (sch - nsch) / 2;
+                    YoffsetP = (Yoffset*100/vch);
+                    Xoffset = (scw - nscw) / 2;
+                    XoffsetP = (Xoffset*100/vcw);
+                    debug_line("Yoffset: " + Yoffset + " YoffsetP as %: " + YoffsetP);
+                    debug_line("ns: " + ns + " nscw: " + nscw + " scw: " + scw + " nsch: " + nsch + " sch: " + sch);
+                }
+                // If we have a new scale percentage value, apply it to the SVG and reposition the SVG to the top
+                if (ns != null) {
+                  renderedSVG.style.webkitTransform = "scale(" + ((ns-2) / 100) + ") translate(-"+XoffsetP+"%, -"+YoffsetP+"%)";
+                  debug_line("wkt xXy: " + renderedSVG.style.webkitTransform);
+                }
             }
           }
         </script>
         </head>
-      <body onload="plotGraphviz(src('preview-render'))">
+      <body onload="plotGraphviz(src('preview-render'));">
+        <textarea id="debug-line" style="position: fixed; top: 1em; right: 1em; z-index: 100; width:40%; visibility: hidden;" rows=10></textarea>
         <script type="text/vnd.graphviz" id="preview-render">
         #{text}
         </script>
