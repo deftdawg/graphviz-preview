@@ -2,16 +2,16 @@ url = require 'url'
 
 GraphvizPreviewView = require './graphviz-preview-view'
 
-{$, $$$, ScrollView} = require 'atom'
+{CompositeDisposable} = require 'atom'
 
 module.exports =
   graphvizPreviewView: null
 
   activate: (state) ->
-    atom.workspaceView.command 'graphviz-preview:toggle', =>
-      @toggle()
+    @subscriptions = new CompositeDisposable
+    @subscriptions.add atom.commands.add 'atom-text-editor', 'graphviz-preview:toggle': => @toggle()
 
-    atom.workspace.registerOpener (uriToOpen) ->
+    atom.workspace.addOpener (uriToOpen) ->
       try
         {protocol, host, pathname} = url.parse(uriToOpen)
       catch error
@@ -30,14 +30,14 @@ module.exports =
         new GraphvizPreviewView(filePath: pathname)
 
   toggle: ->
-    editor = atom.workspace.getActiveEditor()
+    editor = atom.workspace.getActiveTextEditor()
     return unless editor?
 
     uri = "html-preview://editor/#{editor.id}"
 
-    previewPane = atom.workspace.paneForUri(uri)
+    previewPane = atom.workspace.paneForURI(uri)
     if previewPane
-      previewPane.destroyItem(previewPane.itemForUri(uri))
+      previewPane.destroyItem(previewPane.itemForURI(uri))
       return
 
     previousActivePane = atom.workspace.getActivePane()
@@ -45,3 +45,6 @@ module.exports =
       if graphvizPreviewView instanceof GraphvizPreviewView
         graphvizPreviewView.renderHTML()
         previousActivePane.activate()
+
+  deactivate: ->
+    @subscriptions.dispose()

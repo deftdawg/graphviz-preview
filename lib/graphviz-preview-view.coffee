@@ -1,10 +1,14 @@
 path = require 'path'
-{$, $$$, ScrollView} = require 'atom'
+{CompositeDisposable, Disposable} = require 'atom'
+{$, $$$, ScrollView}  = require 'atom-space-pen-views'
 # _ = require 'underscore-plus'
 
 module.exports =
 class GraphvizPreviewView extends ScrollView
   atom.deserializers.add(this)
+
+  editorSub           : null
+
 
   @deserialize: (state) ->
     new GraphvizPreviewView(state)
@@ -21,7 +25,7 @@ class GraphvizPreviewView extends ScrollView
       if atom.workspace?
         @subscribeToFilePath(filePath)
       else
-        @subscribe atom.packages.once 'activated', =>
+        atom.packages.onDidActivatePackage =>
           @subscribeToFilePath(filePath)
 
   serialize: ->
@@ -30,7 +34,7 @@ class GraphvizPreviewView extends ScrollView
     editorId: @editorId
 
   destroy: ->
-    @unsubscribe()
+    @editorSub.dispose()
 
   subscribeToFilePath: (filePath) ->
     @trigger 'title-changed'
@@ -47,31 +51,33 @@ class GraphvizPreviewView extends ScrollView
       else
         # The editor this preview was created for has been closed so close
         # this preview since a preview cannot be rendered without an editor
-        @parents('.pane').view()?.destroyItem(this)
+        atom.workspace?.paneForItem(this)?.destroyItem(this)
 
     if atom.workspace?
       resolve()
     else
-      @subscribe atom.packages.once 'activated', =>
+      atom.packages.onDidActivatePackage =>
         resolve()
         @renderHTML()
 
   editorForId: (editorId) ->
-    for editor in atom.workspace.getEditors()
+    for editor in atom.workspace.getTextEditors()
       return editor if editor.id?.toString() is editorId.toString()
     null
 
-  handleEvents: ->
+  handleEvents: =>
 
     changeHandler = =>
       @renderHTML()
-      pane = atom.workspace.paneForUri(@getUri())
+      pane = atom.workspace.paneForURI(@getURI())
       if pane? and pane isnt atom.workspace.getActivePane()
         pane.activateItem(this)
 
+    @editorSub = new CompositeDisposable
+
     if @editor?
-      @subscribe(@editor.getBuffer(), 'contents-modified', changeHandler)
-      @subscribe @editor, 'path-changed', => @trigger 'title-changed'
+      @editorSub.add @editor.onDidSave changeHandler
+      @editorSub.add @editor.onDidChangePath => @trigger 'title-changed'
 
   renderHTML: ->
     @showLoading()
