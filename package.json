@@ -3,13 +3,13 @@
   "main": "./lib/graphviz-preview",
   "version": "0.3.0",
   "description": "Open a rendered version of the DOT in the current editor with `ctrl-d`.",
-  "activationEvents": [
-    "graphviz-preview:toggle"
-  ],
+  "activationCommands": {
+    "atom-text-editor": ["graphviz-preview:toggle"]
+  },
   "repository": "https://github.com/jumpkick/graphviz-preview.git",
   "license": "MIT",
   "engines": {
-    "atom": ">0.50.0"
+    "atom": ">=0.185.0 <2.0.0"
   },
   "bugs": {
     "url": "https://github.com/jumpkick/graphviz-preview/issues"
@@ -19,5 +19,8 @@
     "graphviz",
     "dot"
   ],
-  "readmeFilename": "README.md"
+  "readmeFilename": "README.md",
+  "dependencies": {
+    "atom-space-pen-views": "^2.0.5"
+  }
 }
