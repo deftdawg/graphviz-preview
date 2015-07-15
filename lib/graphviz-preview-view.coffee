@@ -251,7 +251,7 @@ class GraphvizPreviewView extends ScrollView
     else
       "HTML Preview"
 
-  getUri: ->
+  getURI: ->
     "html-preview://editor/#{@editorId}"
 
   getPath: ->
