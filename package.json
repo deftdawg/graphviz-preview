@@ -1,7 +1,7 @@
 {
   "name": "graphviz-preview",
   "main": "./lib/graphviz-preview",
-  "version": "0.5.0",
+  "version": "1.0.0",
   "description": "Open a rendered version of the DOT in the current editor with `ctrl-d`.",
   "activationCommands": {
     "atom-text-editor": [
