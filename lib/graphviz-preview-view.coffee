@@ -243,7 +243,8 @@ class GraphvizPreviewView extends ScrollView
     # row = extact error line
     # @editor.setCursorBufferPosition([row,Infinity])
 
-    @trigger('graphviz-preview:html-changed')
+    # @trigger('graphviz-preview:html-changed')
+    atom.commands.dispatch 'graphviz-preview', 'html-changed'
 
   getTitle: ->
     if @editor?
