@@ -41,7 +41,7 @@ module.exports =
       return
 
     previousActivePane = atom.workspace.getActivePane()
-    atom.workspace.open(uri, split: 'right', searchAllPanes: true).done (graphvizPreviewView) ->
+    atom.workspace.open(uri, split: 'right', searchAllPanes: true).then (graphvizPreviewView) ->
       if graphvizPreviewView instanceof GraphvizPreviewView
         graphvizPreviewView.renderHTML()
         previousActivePane.activate()
