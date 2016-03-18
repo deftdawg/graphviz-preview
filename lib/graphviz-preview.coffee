@@ -17,7 +17,7 @@ module.exports =
       catch error
         return
 
-      return unless protocol is 'html-preview:'
+      return unless protocol is 'graphviz-preview:'
 
       try
         pathname = decodeURI(pathname) if pathname
@@ -33,7 +33,7 @@ module.exports =
     editor = atom.workspace.getActiveTextEditor()
     return unless editor?
 
-    uri = "html-preview://editor/#{editor.id}"
+    uri = "graphviz-preview://editor/#{editor.id}"
 
     previewPane = atom.workspace.paneForURI(uri)
     if previewPane
