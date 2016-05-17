@@ -234,9 +234,18 @@ class GraphvizPreviewView extends ScrollView
       </body>
     </html>
     """
-    iframe = document.createElement("iframe")
-    iframe.src = "data:text/html;charset=utf-8,#{encodeURI(text)}"
-    @html $ iframe
+    #iframe = document.createElement("iframe")
+    #iframe.src = "data:text/html;charset=utf-8,#{encodeURI(text)}"
+
+    '''##########################################################
+    Change: Using iframe does not pass the Content policy for the newer NPM modules.
+    I have taken the example from html-preview and have used webview instead.
+    This allows us to set the scripts and styles to be run from the same origin.
+    ###########################################################'''
+    webview = document.createElement("webview")
+    webview.setAttribute("sandbox", "allow-scripts allow-same-origin")
+    webview.src = "data:text/html;charset=utf-8,#{encodeURI(text)}"
+    @html $ webview
     # TODO: jump to error line in the editor
     # somehow get rendered HTML from iframe body and extract out error line number
     # if (iframe.innerText)
@@ -253,7 +262,7 @@ class GraphvizPreviewView extends ScrollView
       "HTML Preview"
 
   getURI: ->
-    "html-preview://editor/#{@editorId}"
+    "graphviz-preview://editor/#{@editorId}"
 
   getPath: ->
     if @editor?
